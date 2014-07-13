@@ -1,0 +1,16 @@
+{
+  "name": "runrunrun",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "underscore": "*",
+    "log": "*",
+    "socket.io": "~0.9.6",
+    "socket.io-wildcard": "*",
+    "supervisor": "~0.5.7",
+    "express": "~4.x"
+  },
+  "engines": {
+    "node": "~0.10.x"
+  }
+}

@@ -53,7 +53,7 @@ Server = cls.Class.extend({
             response.end(content);
         });
 
-        this.webserver.listen(config.port, function(){
+        this.webserver.listen(process.env.PORT || config.port, function(){
             console.log('Listening on http://%s:%d', self.webserver.address().address, self.webserver.address().port);
             self.startGameServer(config);
         });

@@ -163,6 +163,7 @@ module.exports = Game = cls.Class.extend({
                 }
                 player.addController(controller);
                 controller.addPlayer(player);
+                return true;
             }
         }
 

@@ -7,8 +7,7 @@ Types = {
         GAMESINFO: 4,
         ENTERGAME: 5,
         SYNC: 6,
-        SPAWN: 7,
-        DESPAWN: 8
+        ACTION: 7
         /*
         INIT: 0,
         DISCONNECT: 1,
@@ -29,9 +28,17 @@ Types = {
     },
 
     Actions: {
-        GET_ITEM: {
+        TAP: {
             id: 1,
-            label: "Prendre l'objet"
+            label: "TAP"
+        },
+        FIRE: {
+            id: 2,
+            label: "FIRE"
+        },
+        JUMP: {
+            id: 3,
+            label: "JUMP"
         }
     }
 };

@@ -11,6 +11,7 @@ module.exports = Controller = Entity.extend({
         this.id     = this.socket.id;
         this.game   = config.game;
         this.player = null;
+        this.actionsAvailable = [Types.Actions.TAP, Types.Actions.FIRE, Types.Actions.JUMP];
 
         this.socket.on("disconnect", function() {
             if(self.exit_callback) {
@@ -26,14 +27,22 @@ module.exports = Controller = Entity.extend({
                 if(self.exit_callback) {
                     self.exit_callback();
                 }
-            }
-            else if (Types.Messages.SYNC == action) {
+            } else if (Types.Messages.SYNC == action) {
                 try {
                     self.game.tryToSyncPlayer(self, data.code);
-                    self.send(Types.Messages.SYNC, {success: true});
+                    self.send(Types.Messages.SYNC, {success: true, actionsAvailable: self.actionsAvailable});
                 }
                 catch(error) {
                     self.send(Types.Messages.SYNC, {success: false, error: error});
+                }
+            } else if (Types.Messages.ACTION == action) {
+                if (self.hasAction(data.id) && self.player) {
+                    if (data.id == Types.Actions.TAP.id) {
+                        if (!self.player.tap) {
+                            self.player.tap = 0;
+                        }
+                        self.player.tap++;
+                    }
                 }
             }
         });
@@ -58,6 +67,10 @@ module.exports = Controller = Entity.extend({
         });
 
         console.log("Controller " + this.id + " synced with player " + player.id);
+    },
+
+    hasAction: function(id) {
+        return _.findWhere(this.actionsAvailable, {id: id});
     },
 
     removePlayer: function() {

@@ -1,1 +1,46 @@
+html, body {
+    margin: 0;
+}
 
+
+.register {
+    margin: 10px;
+}
+
+.game {
+    .actions {
+        height: 320px;
+    }
+    .action {
+        float: left;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        background-color: #666;
+
+        &.active{
+            background-color: #060;
+        }
+
+        /* TAP */
+        &[data-id="1"] {
+            width: 50%;
+            height: 100%;
+        }
+
+        /* FIRE */
+        &[data-id="2"] {
+            width: 50%;
+            height: 50%;
+        }
+
+        /* JUMP */
+        &[data-id="3"] {
+            width: 50%;
+            height: 50%;
+        }
+    }
+}

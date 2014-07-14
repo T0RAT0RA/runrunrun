@@ -77,7 +77,25 @@ define(["io", "game"], function (io, Game) {
 
         syncController: function (data) {
             if (data.success) {
-                $(".game .mobile .controls, .game .mobile .enter-code").toggle();
+                for (i in data.actionsAvailable) {
+                    action = data.actionsAvailable[i];
+
+                    $("<div>", {
+                        "class": "action",
+                        "data-id": action.id,
+                        html: action.label,
+                    }).appendTo($(".game .mobile .actions"));
+                }
+
+
+                $(".game .mobile .action").swipe({
+                    tap: function(event, target) {
+                        console.log("tap ", $(target).data("id"))
+                        socket.emit(Types.Messages.ACTION, {id: $(target).data("id")});
+                    }
+                });
+
+                $(".game .mobile .actions, .game .mobile .enter-code").toggle();
             } else {
                 $(".game .mobile .code").val("").focus();
                 $(".game .mobile .enter-code .status").html(data.error);

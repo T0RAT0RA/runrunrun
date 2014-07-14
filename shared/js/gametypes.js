@@ -27,6 +27,13 @@ Types = {
         PLAYER: 1,
     },
 
+    States: {
+        WAITING: 1,
+        READY: 2,
+        RUNNING: 3,
+        FINISHED: 4
+    },
+
     Actions: {
         TAP: {
             id: 1,

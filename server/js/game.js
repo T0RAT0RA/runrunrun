@@ -19,6 +19,7 @@ module.exports = Game = cls.Class.extend({
         this.ups = 1;
 
         this.allowDiagonals = false;
+        this.state      = Types.States.WAITING;
         this.entities   = {};
         this.npcs       = {};
         this.players    = {};
@@ -187,8 +188,10 @@ module.exports = Game = cls.Class.extend({
 
         return {
             id: self.id,
+            state: self.state,
             time: new Date().toLocaleTimeString(),
             players_count: Object.keys(filtered_players).length,
+            max_players: self.maxPlayers,
             players: filtered_players,
         }
     }

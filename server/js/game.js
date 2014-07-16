@@ -3,19 +3,20 @@ var cls     = require("./lib/class"),
     Log     = require('log'),
     fs      = require('fs'),
     Player  = require('./player'),
+    Spectator = require('./spectator'),
     Controller = require('./controller'),
     Types   = require("../../shared/js/gametypes");
 
 // ======= GAME SERVER ========
 module.exports = Game = cls.Class.extend({
-    init: function(id, maxPlayers, websocketServer) {
+    init: function(id, maxPlayers, server) {
         var self = this;
 
         console.log("Create new game #" + id);
 
         this.id = id;
         this.maxPlayers = maxPlayers;
-        this.server = websocketServer;
+        this.server = server;
         this.ups = 1;
 
         this.allowDiagonals = false;
@@ -23,6 +24,7 @@ module.exports = Game = cls.Class.extend({
         this.entities   = {};
         this.npcs       = {};
         this.players    = {};
+        this.spectators = {};
 
         this.playerCount = 0;
 
@@ -30,7 +32,7 @@ module.exports = Game = cls.Class.extend({
             log.debug("Player #" + player.id + " entered game " + self.id);
 
             player.onExit(function() {
-                log.info("Player #" + player.id + " has left game " + self.id);
+                log.debug("Player #" + player.id + " has left game " + self.id);
 
                 self.removePlayer(player);
                 self.broadcast(Types.Messages.MESSAGE, player.name + " has left the game.");
@@ -58,17 +60,20 @@ module.exports = Game = cls.Class.extend({
             }
         });
 
-        this.onControllerEnter(function(controller) {
-            log.debug("Controller #" + controller.id + " entered game " + self.id);
+        this.onSpectatorEnter(function(spectator) {
+            log.debug("Spectator entered game " + self.id);
 
-            controller.onExit(function() {
+            spectator.onExit(function() {
+                log.debug("Player #" + player.id + " has left game " + self.id);
+                self.removeSpectator(player);
                 if(self.removed_callback) {
                     self.removed_callback();
                 }
             });
+            self.addSpectator(spectator);
 
-            //Init controller object on client side
-            controller.send(Types.Messages.ENTERGAME, {success: true, controller: self.getCleanEntity(controller), game: self.getState()});
+            //Init spectator object on client side
+            spectator.send(Types.Messages.ENTERGAME, {success: true, spectator: self.getCleanEntity(spectator), game: self.getState()});
         });
 
 
@@ -87,8 +92,8 @@ module.exports = Game = cls.Class.extend({
         this.enter_callback = callback;
     },
 
-    onControllerEnter: function(callback) {
-        this.controller_enter_callback = callback;
+    onSpectatorEnter: function(callback) {
+        this.spectator_enter_callback = callback;
     },
 
     onPlayerAdded: function(callback) {
@@ -147,6 +152,20 @@ module.exports = Game = cls.Class.extend({
     removePlayer: function(player) {
         this.removeEntity(player);
         delete this.players[player.id];
+
+        this.tryToRemoveGame();
+    },
+
+    addSpectator: function(spectator) {
+        this.addEntity(spectator);
+        this.spectators[spectator.id] = spectator;
+    },
+
+    removeSpectator: function(spectator) {
+        this.removeEntity(spectator);
+        delete this.spectators[spectator.id];
+
+        this.tryToRemoveGame();
     },
 
     getEntitiesByType: function() {
@@ -171,10 +190,23 @@ module.exports = Game = cls.Class.extend({
         throw "invalid code";
     },
 
+    tryToRemoveGame: function() {
+        //Delete the game if no more players and spectators
+        if (Object.keys(this.players).length <= 0
+         && Object.keys(this.spectators).length <= 0) {
+            this.server.removeGame(this);
+        }
+    },
+
     broadcast: function(type, message) {
         //this.server.sockets.emit(type, message);
+        /* Do we need to broadcast to players?
         _.each(this.players, function(player){
             player.socket.emit(type, message);
+        });
+        */
+        _.each(this.spectators, function(spectator){
+            spectator.socket.emit(type, message);
         });
     },
 
@@ -190,6 +222,7 @@ module.exports = Game = cls.Class.extend({
             id: self.id,
             state: self.state,
             time: new Date().toLocaleTimeString(),
+            spectators_count: Object.keys(self.spectators).length,
             players_count: Object.keys(filtered_players).length,
             max_players: self.maxPlayers,
             players: filtered_players,

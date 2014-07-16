@@ -61,10 +61,11 @@ module.exports = Controller = Entity.extend({
         }
 
         this.player = player;
-
+        /*
         player.onExit(function(){
             self.removePlayer();
         });
+        */
 
         console.log("Controller " + this.id + " synced with player " + player.id);
     },

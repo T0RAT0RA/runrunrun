@@ -77,17 +77,19 @@ Server = cls.Class.extend({
         };
 
         self.io.sockets.on("connection", function(socket) {
+            self.socket = socket;
+
             //Send GAMES info to the user
             socket.emit(Types.Messages.GAMESINFO, {games: self.getGamesInfo()});
 
             //Create a new run server
             socket.on(Types.Messages.NEWGAME, function() {
                 var maxPlayers = 4;
-                game = new Game(_.uniqueId("game"), maxPlayers, this.io);
+                game = new Game(_.uniqueId("game"), maxPlayers, self);
                 game.run();
                 self.games[game.id] = game;
                 socket.emit(Types.Messages.NEWGAME, {success: true, game: game.id});
-                socket.broadcast.emit(Types.Messages.GAMESINFO, {games: self.getGamesInfo()});
+                self.sendGamesInfo();
             });
 
             //Connect player/controller to a game
@@ -112,24 +114,24 @@ Server = cls.Class.extend({
 
                 if (success) {
                     if (!data.isMobile) {
+                        spectator = new Spectator({
+                            socket: socket,
+                            game: game
+                        });
+                        game.spectator_enter_callback(spectator);
+                    } else {
                         player = new Player({
                             id: ++self.playerCount,
                             socket: socket,
                             game: game
                         });
                         game.enter_callback(player);
-                    } else {
-                        controller = new Controller({
-                            socket: socket,
-                            game: game
-                        });
-                        game.controller_enter_callback(controller);
                     }
                 } else {
                     socket.emit(Types.Messages.ENTERGAME, {success: success, error: error});
                 }
 
-                socket.broadcast.emit(Types.Messages.GAMESINFO, {games: self.getGamesInfo()});
+                self.sendGamesInfo();
             });
 
             //Connect controller to a player
@@ -167,6 +169,19 @@ Server = cls.Class.extend({
             };
         }
         return gamesInfo;
+    },
+
+    removeGame: function(game) {
+        if (this.games[game.id]) {
+            log.debug("Removing game " + game.id);
+            delete this.games[game.id];
+
+            this.sendGamesInfo();
+        }
+    },
+
+    sendGamesInfo: function() {
+        this.socket.broadcast.emit(Types.Messages.GAMESINFO, {games: this.getGamesInfo()});
     },
 
     getConfigFile: function(path, callback) {

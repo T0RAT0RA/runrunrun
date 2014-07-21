@@ -1,0 +1,23 @@
+{{#yield-content}}
+    <div class="game">
+        <img class="loader" src="img/loader.gif">
+        <div class="desktop" style="display: none;">
+            Game <span class="game-id"></span> | <span class="player-count"></span> Player(s)
+            <br/>
+            <pre class="game-info"></pre>
+        </div>
+        <div class="mobile" style="display: none;">
+            <div class="enter-code">
+                Enter code: <input type="text" class="code"/> <button class="send-code">Ok</button>
+                <div class="status"></div>
+            </div>
+            <div class="actions" style="display: none;"></div>
+        </div>
+    </div>
+{{/yield-content}}
+
+{{#yield-scripts}}
+    <script src="/shared/js/gametypes.js"></script>
+    <script src="/js/lib/class.js"></script>
+    <script data-main="/js/start" src="/js/lib/require.js"></script>
+{{/yield-scripts}}

@@ -1,4 +1,4 @@
-define(["io", "game"], function (io, Game) {
+define(["io"], function (io) {
     var socket = io.connect(),
         game = {};
 

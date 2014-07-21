@@ -1,5 +1,5 @@
 {
     "port": 1337,
     "debug_level": "debug",
-    "levelsFolder": "./server/levels/"
+    "levelsFolder": "./game_server/levels/"
 }

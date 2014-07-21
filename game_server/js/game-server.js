@@ -9,55 +9,25 @@ var cls     = require("./lib/class"),
     socketio = require('socket.io'),
     socketioWildcard = require('socket.io-wildcard');
 
-Server = cls.Class.extend({
-    init: function(configPath) {
+module.exports = Server = cls.Class.extend({
+    init: function(app, configPath) {
         var self = this;
 
+        self.app = app;
+        self.defaultConfigPath = './game_server/config.games.json';
+        self.configPath = configPath || self.defaultConfigPath;
         self.games = [];
         self.playerCount = 0;
 
         //Read the config file
-        self.getConfigFile(configPath, function(config) {
+        self.getConfigFile(self.configPath, function(config) {
             if(config) {
-                self.startWebServer(config);
+                self.startGameServer(config);
             } else {
-                console.error("Server cannot start without configuration file.");
+                console.error("Game Server cannot start without configuration file.");
                 process.exit(1);
             }
         });
-    },
-
-    startWebServer: function(config) {
-        var self = this;
-
-        console.log("Starting the web server.");
-
-        this.webserver = http.createServer(function(request, response){
-            pathname = url.parse(request.url).pathname;
-            filesFolder = "./client";
-            contentType = {"Content-Type": "text/html"};
-            status = 200;
-
-            if (pathname == "/") { pathname = "/index.html"; }
-            if (pathname.indexOf("/shared/") >= 0) { filesFolder = "./"; }
-            if (pathname.indexOf(".js") >= 0) { contentType = {"Content-Type": "application/javascript"}; }
-
-            try {
-                content = fs.readFileSync(filesFolder + pathname);
-            } catch(err) {
-                status = 404;
-                content = null;
-            }
-
-            response.writeHead(status, contentType);
-            response.end(content);
-        });
-
-        this.webserver.listen(process.env.PORT || config.port, function(){
-            console.log('Listening on http://%s:%d', self.webserver.address().address, self.webserver.address().port);
-            self.startGameServer(config);
-        });
-
     },
 
     startGameServer: function(config) {
@@ -65,7 +35,7 @@ Server = cls.Class.extend({
 
         console.log("Starting the game server.");
 
-        this.io = socketioWildcard(socketio).listen(this.webserver, {log: false});
+        this.io = socketioWildcard(socketio).listen(self.app, {log: false});
 
         switch(config.debug_level) {
             case "error":
@@ -138,24 +108,6 @@ Server = cls.Class.extend({
             socket.on(Types.Messages.NEWCONTROLLER, function(data) {
             });
         });
-
-        //Read the world maps folder
-        /*
-        var files = fs.readdirSync(config.worldsFolder);
-        _.each(files, function(file) {
-            getConfigFile(config.worldsFolder + file, function(world_config){
-                var world = new WorldServer('world_'+ (world_config.id), world_config.nb_players, server, {map: world_config.map});
-                world.run();
-                worlds[world.id] = world;
-            });
-        });
-        */
-
-        /*
-        process.on('uncaughtException', function (e) {
-            log.error('uncaughtException: ' + e);
-        });
-        */
     },
 
     getGamesInfo: function() {
@@ -195,6 +147,3 @@ Server = cls.Class.extend({
         });
     }
 });
-
-var defaultConfigPath = './server/config.games.json',
-    server = new Server(defaultConfigPath);

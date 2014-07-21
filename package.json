@@ -2,15 +2,23 @@
   "name": "runrunrun",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
   "dependencies": {
     "underscore": "*",
     "log": "*",
     "socket.io": "~0.9.6",
     "socket.io-wildcard": "*",
     "supervisor": "~0.5.7",
-    "express": "~4.x"
-  },
-  "engines": {
-    "node": "~0.10.x"
+    "express": "~4.2.0",
+    "static-favicon": "~1.0.0",
+    "morgan": "~1.0.0",
+    "cookie-parser": "~1.0.1",
+    "body-parser": "~1.0.0",
+    "debug": "~0.7.4",
+    "hjs": "~0.0.6",
+    "less-middleware": "1.0.x",
+    "hogan-express": "~0.5.2"
   }
 }

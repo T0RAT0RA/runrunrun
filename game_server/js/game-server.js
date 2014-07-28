@@ -9,8 +9,11 @@ var cls     = require("./lib/class"),
     socketio = require('socket.io'),
     socketioWildcard = require('socket.io-wildcard');
 
-module.exports = Server = cls.Class.extend({
-    init: function(app, configPath) {
+GameServer = cls.Class.extend({
+    init: function() {
+    },
+
+    configureAndStart: function(app, configPath) {
         var self = this;
 
         self.app = app;
@@ -34,6 +37,7 @@ module.exports = Server = cls.Class.extend({
         var self = this;
 
         console.log("Starting the game server.");
+        this.app.gameServer = this;
 
         this.io = socketioWildcard(socketio).listen(self.app, {log: false});
 
@@ -65,7 +69,8 @@ module.exports = Server = cls.Class.extend({
             //Connect player/controller to a game
             socket.on(Types.Messages.ENTERGAME, function(data) {
                 var success = true,
-                    error = "";
+                    error = "",
+                    game = {};
 
                 if (self.games[data.game]) {
                     game = self.games[data.game];
@@ -147,3 +152,4 @@ module.exports = Server = cls.Class.extend({
         });
     }
 });
+gameServer = module.exports = new GameServer();

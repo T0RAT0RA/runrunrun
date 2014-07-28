@@ -4,10 +4,16 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var gameServer  = require("./game_server/js/game-server.js");
 
-var routes = require('./routes/index');
+var routes = {
+        index: require('./routes/index'),
+        games: require('./routes/games')
+    };
 
-var app = express();
+console.log("Starting the web server.");
+
+var app = module.exports = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -23,7 +29,12 @@ app.use(cookieParser());
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
+app.use('/', routes.index);
+app.use('/game', routes.games);
+
+app.get('/test', function(req, res){
+  res.send(Object.keys(gameServer.games));
+});
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -56,5 +67,9 @@ app.use(function(err, req, res, next) {
     });
 });
 
+app.startGameServer = function(app) {
+    gameServer.configureAndStart(app);
+};
 
 module.exports = app;
+

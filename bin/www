@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 var debug   = require('debug')('runrunrun'),
-    app     = require('../app'),
-    GameServer  = require("../game_server/js/game-server.js");
+    app     = require('../app');
 
 app.set('port', process.env.PORT || 1337);
 
 var webServer = app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + webServer.address().port);
+  app.startGameServer(this);
 });
-
-var gameServer = new GameServer(webServer);

@@ -37,16 +37,16 @@ define(["io"], function (io) {
                 socket.emit(Types.Messages.SYNC, {code: $(".game .mobile .code").val()});
             });
 
-            if (window.location.hash) {
-                var gameId = window.location.hash.replace("#", "");
+            var matches = window.location.pathname.match(/game\/([^\/]*)\/?$/);
+            if (matches && matches[1]) {
+                var gameId = matches[1];
                 socket.emit(Types.Messages.ENTERGAME, {game: gameId, isMobile: self.isMobile()});
             }
         },
 
         newGame: function (data) {
-            //TODO: change page to /game/<id>
             if (data.game) {
-                socket.emit(Types.Messages.ENTERGAME, {game: data.game});
+                window.location = "/game/" + data.game;
             }
         },
 

@@ -61,11 +61,11 @@ module.exports = Game = cls.Class.extend({
         });
 
         this.onSpectatorEnter(function(spectator) {
-            log.debug("Spectator entered game " + self.id);
+            log.debug("Spectator #" + spectator.id + " entered game " + self.id);
 
             spectator.onExit(function() {
-                log.debug("Player #" + player.id + " has left game " + self.id);
-                self.removeSpectator(player);
+                log.debug("Spectator #" + spectator.id + " has left game " + self.id);
+                self.removeSpectator(spectator);
                 if(self.removed_callback) {
                     self.removed_callback();
                 }

@@ -15,7 +15,11 @@ module.exports = Player = Entity.extend({
 
         this.game   = config.game;
         this.hasEnteredGame = false;
-        this.hasController = false;
+        this.isReady = false;
+        this.actionsAvailable = [Types.Actions.TAP, Types.Actions.FIRE, Types.Actions.JUMP];
+        this.tap = 0;
+        this.jump = 0;
+        this.fire = 0;
 
         this.socket.on("disconnect", function() {
             if(self.exit_callback) {
@@ -31,16 +35,19 @@ module.exports = Player = Entity.extend({
                 if(self.exit_callback) {
                     self.exit_callback();
                 }
-            }
-            else if (Types.Messages.CHAT == action) {
-                self.game.broadcast(Types.Messages.CHAT, {id: self.id, name: self.name, message: data});
-            }
-            else if (Types.Messages.ACTION == action) {
+            } else if (Types.Messages.SYNC == action) {
+                if (self.code == data.code) {
+                    self.isReady = true;
+                    self.send(Types.Messages.SYNC, {success: true, actionsAvailable: self.actionsAvailable});
+                } else {
+                    error = "invalid code"
+                    self.send(Types.Messages.SYNC, {success: false, error: error});
+                }
+            } else if (Types.Messages.ACTION == action) {
                 if (self.hasAction(data.id)) {
-                    if (data.id == Types.Actions.ADD_NPC.id) { self.game.addNpc(); }
-                    if (data.id == Types.Actions.REMOVE_NPCS.id) { self.game.removeNpcs(); }
-                    if (data.id == Types.Actions.CALL_JACK_BAUER.id) { self.game.callBauer(self); }
-                    if (data.id == Types.Actions.IDEA.id) { self.setAction({id: Types.Actions.IDEA.id, duration: Types.Actions.IDEA.duration}) }
+                    if (data.id == Types.Actions.TAP.id) { self.tap++; }
+                    if (data.id == Types.Actions.JUMP.id) { self.jump++; }
+                    if (data.id == Types.Actions.FIRE.id) { self.fire++; }
                 }
             }
         });
@@ -50,28 +57,8 @@ module.exports = Player = Entity.extend({
         this.exit_callback = callback;
     },
 
-    addController: function(controller) {
-        var self = this;
-
-        if (this.controller) {
-            //already synced with a controller
-            return false;
-        }
-
-        this.controller = controller;
-        this.hasController = true;
-
-        controller.onExit(function(){
-            self.removeController();
-        });
-
-        console.log("Player " + this.id + " synced with controller " + controller.id);
-    },
-
-    removeController: function() {
-        this.controller = null;
-        this.hasController = false;
-        console.log("Player " + this.id + " lost  controller");
+    hasAction: function(id) {
+        return _.findWhere(this.actionsAvailable, {id: id});
     },
 
     formatUsername: function(username) {

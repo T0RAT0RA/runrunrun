@@ -12,13 +12,13 @@ define(["io"], function (io) {
             socket.on(Types.Messages.GAMEINFO, this.updateGameInfo.bind(this));
             socket.on(Types.Messages.NEWGAME, this.newGame.bind(this));
             socket.on(Types.Messages.ENTERGAME, this.enterGame.bind(this));
-            socket.on(Types.Messages.SYNC, this.syncController.bind(this));
+            socket.on(Types.Messages.SYNC, this.syncPlayer.bind(this));
             socket.on("disconnect", this.onGameDisconnect.bind(this));
 
             this.bindEvents();
 
             $(".register button, .register select").prop("disabled", false);
-            $(".register .loader").remove();
+            $(".register .loader, .game .loader").remove();
         },
 
         bindEvents: function () {
@@ -34,6 +34,7 @@ define(["io"], function (io) {
 
             $(".game .mobile .send-code").on("click", function() {
                 if (!$(".game .mobile .code").val()) { return; }
+                console.log("App - send code: " + $(".game .mobile .code").val())
                 socket.emit(Types.Messages.SYNC, {code: $(".game .mobile .code").val()});
             });
 
@@ -70,7 +71,8 @@ define(["io"], function (io) {
             }
         },
 
-        syncController: function (data) {
+        syncPlayer: function (data) {
+            console.log("App - syncPlayer", data)
             if (data.success) {
                 for (i in data.actionsAvailable) {
                     action = data.actionsAvailable[i];

@@ -4,7 +4,6 @@ var cls     = require("./lib/class"),
     fs      = require('fs'),
     Player  = require('./player'),
     Spectator = require('./spectator'),
-    Controller = require('./controller'),
     Types   = require("../../shared/js/gametypes");
 
 // ======= GAME SERVER ========
@@ -174,22 +173,6 @@ module.exports = Game = cls.Class.extend({
         });
     },
 
-    tryToSyncPlayer: function(controller, code) {
-        for (id in this.players) {
-            player = this.players[id];
-            if (player.code == code) {
-                if (player.hasController) {
-                    throw "code already used";
-                }
-                player.addController(controller);
-                controller.addPlayer(player);
-                return true;
-            }
-        }
-
-        throw "invalid code";
-    },
-
     tryToRemoveGame: function() {
         //Delete the game if no more players and spectators
         if (Object.keys(this.players).length <= 0
@@ -211,7 +194,7 @@ module.exports = Game = cls.Class.extend({
     },
 
     getCleanEntity: function(entity) {
-        return _.omit(entity, 'game', 'socket', 'controller', 'player', 'hasEnteredGame');
+        return _.omit(entity, 'game', 'socket', 'player', 'actionsAvailable');
     },
 
     getState: function() {

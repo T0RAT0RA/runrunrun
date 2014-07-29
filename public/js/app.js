@@ -32,10 +32,13 @@ define(["io"], function (io) {
                 socket.emit(Types.Messages.ENTERGAME, {game: $(this).val(), isMobile: self.isMobile()});
             });
 
-            $(".game .mobile .send-code").on("click", function() {
-                if (!$(".game .mobile .code").val()) { return; }
+            $(".game .mobile .enter-code").on("submit", function() {
+                if (!$(".game .mobile .code").val()) { return false; }
+
                 console.log("App - send code: " + $(".game .mobile .code").val())
                 socket.emit(Types.Messages.SYNC, {code: $(".game .mobile .code").val()});
+
+                return false;
             });
 
             var matches = window.location.pathname.match(/game\/([^\/]*)\/?$/);

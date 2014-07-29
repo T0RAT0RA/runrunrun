@@ -29,7 +29,8 @@ define(["io"], function (io) {
             });
 
             $(".register .game-list").on("change", function() {
-                socket.emit(Types.Messages.ENTERGAME, {game: $(this).val(), isMobile: self.isMobile()});
+                if (!$(this).val()) { return; }
+                window.location = "/game/" + $(this).val();
             });
 
             $(".game .mobile .enter-code").on("submit", function() {
